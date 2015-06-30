@@ -1,4 +1,24 @@
 \documentclass{article}
+\usepackage{graphicx}
 \begin{document}
-Hola! Esto es un comienzo de informe.
+\begin{figure}
+\centering
+\includegraphics[width=0.9\linewidth]{./logo_fiuba_alta}
+\label{fig:logo_fiuba_alta}
+\end{figure}
+
+\title{Informe sobre GO - Teor\'{\i}a del Lenguaje}
+\author{Cristian Gonzalez \and Billy}
+\date{1° Cuatrimestre, 2015}
+\maketitle
+\section{Historia}
+\section{Recolector de Basura}
+El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
+Ac\'{a} explicamos la características de cada conjunto.
+\\
+\\
+
+
+Otra caracteristica importante es \textit{stop-the-world} el cual pausa, al momento de correr el recolector, todos los hilos menos aquellos que utilice el recolector hasta que finalice el mismo. 
+
 \end{document}
