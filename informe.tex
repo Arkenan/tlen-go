@@ -15,9 +15,11 @@
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
 Ac\'{a} explicamos la características de cada conjunto.
-\\
-\\
-
+\begin{itemize}
+\item[$\bullet$] Gris:
+\item Negro: El conjunto negro es el conjunto de objetos que pueden ser mostrados por tener referencias salientes a los objetos en el conjunto blanco, y por ser accesible desde la raíz. Los negros no son candidatos a reciclar, en algunas implementaciones el conjunto negro empieza vacio. 
+\item Blanco: son aquellos que son candidatos a reciclar. En un principio todos son candidatos a reciclar. 
+\end{itemize}
 
 Otra caracteristica importante es \textit{stop-the-world} el cual pausa, al momento de correr el recolector, todos los hilos menos aquellos que utilice el recolector hasta que finalice el mismo. 
 
