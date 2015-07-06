@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{color}
 \usepackage{graphicx}
 %Para el español
 \usepackage[spanish]{babel}
@@ -8,6 +9,26 @@
 \usepackage{listings}
 %Para el código en Go.
 \usepackage{lstlang0}
+%Settings para los fragmentos de código.
+\definecolor{orange}{rgb}{0.99, 0.50, 0.13}
+\definecolor{carnelian}{rgb}{0.7, 0.11, 0.11}
+\definecolor{cerulean}{rgb}{0.0, 0.48, 0.65}
+\definecolor{royalblue}{rgb}{0.0, 0.14, 0.4}
+\definecolor{shamrockgreen}{rgb}{0.0, 0.62, 0.38}
+\lstset{
+	language = go,
+	numbers = left,
+	%Keywords
+	keywordstyle = {[1]\color{orange}\bfseries},
+	%Funciones
+	keywordstyle = {[2]\color{shamrockgreen}\bfseries},
+	%Tipos
+	keywordstyle = {[3]\color{royalblue}},
+	stringstyle = \color{carnelian},
+	commentstyle = \color{cerulean},
+	showstringspaces = false,
+	frame=tb
+}
 
 \begin{document}
 
@@ -22,15 +43,39 @@
 \date{1$^{er}$ Cuatrimestre, 2015}
 \maketitle
 \section{Historia}
+% y un poco de lo general.
+% Compilador y demas.
+
+\section{Sintaxis Básica}
+\subsection{Paquetes}
+Cada archivo de código fuente, independientemente de su nombre, aclara en la primera línea a qué paquete pertenece.
+
+Si se quiere acceder desde un paquete a otro, lo que se hace es importar su path. Por convención, los paquetes se llaman como el último elemento del path. Importar un paquete permite usar los nombres que este exporta. Para señalar en un paquete que un elemento se exporta, su nombre comienza con mayúscula.
+
+Un proyecto comienza a ejecutarse en la función main del paquete main.
+
+\lstinputlisting[caption="Hello World en Go"]{codigo/helloWorld.go}
+
+Se puede importar más de un paquete con la forma factoreada. Esta forma es utilizada también para otras keywords además de import, como var.
+
+\begin{lstlisting}[caption=Forma Factoreada]
+import (
+	"fmt" 
+	"math"
+)
+\end{lstlisting}
+
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
 Acá explicamos las características de cada conjunto.
 \begin{itemize}
-\item[$\bullet$] Gris:
-\item Negro: El conjunto negro es el conjunto de objetos que pueden ser mostrados por tener referencias salientes a los objetos en el conjunto blanco, y por ser accesible desde la raíz. Los negros no son candidatos a reciclar, en algunas implementaciones el conjunto negro empieza vacío. 
-\item Blanco: son aquellos que son candidatos a reciclar. En un principio todos son candidatos a reciclar. 
+	\item[$\bullet$] Gris:
+	\item Negro: El conjunto negro es el conjunto de objetos que pueden ser mostrados por tener referencias salientes a los objetos en el conjunto blanco, y por ser accesible desde la raíz. Los negros no son candidatos a reciclar, en algunas implementaciones el conjunto negro empieza vacío. 
+	\item Blanco: son aquellos que son candidatos a reciclar. En un principio todos son candidatos a reciclar. 
 \end{itemize}
 
 Otra característica importante es \textit{stop-the-world} el cual pausa, al momento de correr el recolector, todos los hilos menos aquellos que utilice el recolector hasta que finalice el mismo. 
+
+
 
 \end{document}
