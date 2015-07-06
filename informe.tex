@@ -1,26 +1,26 @@
 \documentclass{article}
 
-
-\usepackage{color}
 \usepackage{graphicx}
+% Links
 \usepackage[pdftex, colorlinks, urlcolor=blue, linkcolor=black]{hyperref}
-%Para el español
+% Para el español
 \usepackage[spanish]{babel}
 \usepackage[utf8]{inputenc}
-%Codigo
+% Codigo
 \usepackage{listings}
-%Para el código en Go.
+% Para el código en Go.
 \usepackage{lstlang0}
-%Settings para los fragmentos de código.
+% Colores personalizados.
+\usepackage{color}
 \definecolor{orange}{rgb}{0.99, 0.50, 0.13}
 \definecolor{carnelian}{rgb}{0.7, 0.11, 0.11}
 \definecolor{cerulean}{rgb}{0.0, 0.48, 0.65}
 \definecolor{royalblue}{rgb}{0.0, 0.14, 0.4}
 \definecolor{shamrockgreen}{rgb}{0.0, 0.62, 0.38}
+% Settings para los fragmentos de código.
 \renewcommand{\lstlistingname}{Fragmento}
 \lstset{
 	language = go,
-	%basicstyle = \footnotesize,
 	numbers = left,
 	%Keywords
 	keywordstyle = {[1]\color{orange}\bfseries},
@@ -30,8 +30,8 @@
 	keywordstyle = {[3]\color{royalblue}},
 	stringstyle = \color{carnelian},
 	commentstyle = \color{cerulean},
+	frame = tb,
 	showstringspaces = false,
-	frame=tb,
 	breaklines = true,
 }
 
