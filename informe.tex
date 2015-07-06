@@ -1,26 +1,36 @@
 \documentclass{article}
+
 \usepackage{graphicx}
+%Para el español
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+%Codigo
+\usepackage{listings}
+%Para el código en Go.
+\usepackage{lstlang0}
+
 \begin{document}
+
 \begin{figure}
-\centering
-\includegraphics[width=0.9\linewidth]{./logo_fiuba_alta}
-\label{fig:logo_fiuba_alta}
+	\centering
+	\includegraphics[width=0.9\linewidth]{./logo_fiuba_alta}
+	\label{fig:logo_fiuba_alta}
 \end{figure}
 
-\title{Informe sobre GO - Teor\'{\i}a del Lenguaje}
-\author{Cristian Gonzalez \and Billy}
-\date{1° Cuatrimestre, 2015}
+\title{Informe sobre GO - Teoría del Lenguaje}
+\author{Cristian Gonzalez \and Tomás Arjovsky}
+\date{1$^{er}$ Cuatrimestre, 2015}
 \maketitle
 \section{Historia}
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
-Ac\'{a} explicamos la características de cada conjunto.
+Acá explicamos las características de cada conjunto.
 \begin{itemize}
 \item[$\bullet$] Gris:
-\item Negro: El conjunto negro es el conjunto de objetos que pueden ser mostrados por tener referencias salientes a los objetos en el conjunto blanco, y por ser accesible desde la raíz. Los negros no son candidatos a reciclar, en algunas implementaciones el conjunto negro empieza vacio. 
+\item Negro: El conjunto negro es el conjunto de objetos que pueden ser mostrados por tener referencias salientes a los objetos en el conjunto blanco, y por ser accesible desde la raíz. Los negros no son candidatos a reciclar, en algunas implementaciones el conjunto negro empieza vacío. 
 \item Blanco: son aquellos que son candidatos a reciclar. En un principio todos son candidatos a reciclar. 
 \end{itemize}
 
-Otra caracteristica importante es \textit{stop-the-world} el cual pausa, al momento de correr el recolector, todos los hilos menos aquellos que utilice el recolector hasta que finalice el mismo. 
+Otra característica importante es \textit{stop-the-world} el cual pausa, al momento de correr el recolector, todos los hilos menos aquellos que utilice el recolector hasta que finalice el mismo. 
 
 \end{document}
