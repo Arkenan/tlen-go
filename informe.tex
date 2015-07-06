@@ -1,7 +1,9 @@
 \documentclass{article}
 
+
 \usepackage{color}
 \usepackage{graphicx}
+\usepackage[pdftex, colorlinks, urlcolor=blue, linkcolor=black]{hyperref}
 %Para el español
 \usepackage[spanish]{babel}
 \usepackage[utf8]{inputenc}
@@ -15,8 +17,10 @@
 \definecolor{cerulean}{rgb}{0.0, 0.48, 0.65}
 \definecolor{royalblue}{rgb}{0.0, 0.14, 0.4}
 \definecolor{shamrockgreen}{rgb}{0.0, 0.62, 0.38}
+\renewcommand{\lstlistingname}{Fragmento}
 \lstset{
 	language = go,
+	%basicstyle = \footnotesize,
 	numbers = left,
 	%Keywords
 	keywordstyle = {[1]\color{orange}\bfseries},
@@ -27,7 +31,8 @@
 	stringstyle = \color{carnelian},
 	commentstyle = \color{cerulean},
 	showstringspaces = false,
-	frame=tb
+	frame=tb,
+	breaklines = true,
 }
 
 \begin{document}
@@ -44,13 +49,13 @@
 \maketitle
 \section{Historia}
 % y un poco de lo general.
-% Compilador y demas.
+% Compilador, formateador de codigo y demas.
 
 \section{Sintaxis Básica}
 \subsection{Paquetes}
 Cada archivo de código fuente, independientemente de su nombre, aclara en la primera línea a qué paquete pertenece.
 
-Si se quiere acceder desde un paquete a otro, lo que se hace es importar su path. Por convención, los paquetes se llaman como el último elemento del path. Importar un paquete permite usar los nombres que este exporta. Para señalar en un paquete que un elemento se exporta, su nombre comienza con mayúscula.
+Si se quiere acceder desde un paquete a otro, lo que se hace es importar su path. Por convención, los paquetes se llaman como el último elemento del path. Importar un paquete permite usar los nombres que este exporta, típicamente funciones o variables globales (al paquete). Para señalar que un elemento se exporta, su nombre comienza con mayúscula.
 
 Un proyecto comienza a ejecutarse en la función main del paquete main.
 
@@ -65,6 +70,33 @@ import (
 )
 \end{lstlisting}
 
+\subsection{Variables}
+Las variables en Go son declaradas de forma inversa al C, pareciéndose más a la de Pascal. Esta decisión fue tomada por los creadores principalmente por la dificultad para entender en C los tipos compuestos con punteros y las funciones de alto orden\cite{dec}.
+\begin{description}
+	\item[Declaracion:]\hfill \\
+		\lstinline|var a,b,c int|
+	\item[Inicialización en declaración:] \hfill \\
+		\lstinline|var a,b,c int = 1,2,3 // Hay asignacion multiple!|
+	\item[Inferencia de Tipos:] para constantes y variables. \\
+		\lstinline|var c = 1 // c pasa a ser de tipo int.|
+	\item[Forma Compacta:] \hfill \\
+		\lstinline|c := 1 // c se declara y se asigna.|
+	
+	Esta forma se puede usar siempre y cuando se esté dentro de una función (main incluída). Esto se debe a que globalmente (a nivel paquete) todas las líneas deben empezar con alguna keyword. 
+	\item[Forma Factoreada:] La keyword \lstinline|var| también admite forma factoreada.
+\begin{lstlisting}
+var (
+	a = 3 // inferencia sobre constante.
+	b = a // inferencia sobre variable que ya tiene tipo.
+)
+\end{lstlisting}
+\end{description}
+
+Al asignar en Go una variable a la otra, se asigna el valor, al estilo imperativo, con lo cual cambiar una no tendrá ningún efecto sobre la otra (como si sucedería en los lenguajes como Java, donde las variables son referencias).
+
+Los punteros se declaran de la forma \lstinline|var a *int|. A diferencia de C, \emph{no hay aritmética de punteros}. Esta omisión fue pensada para aumentar la seguridad (evitar direcciones ilegales) y simplificar la implementación del recolector de basura.\cite{pa}
+%TODO ver el tema del make, que no se puede hacer personalizado.
+
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
 Acá explicamos las características de cada conjunto.
@@ -76,6 +108,9 @@ Acá explicamos las características de cada conjunto.
 
 Otra característica importante es \textit{stop-the-world} el cual pausa, al momento de correr el recolector, todos los hilos menos aquellos que utilice el recolector hasta que finalice el mismo. 
 
-
+\begin{thebibliography}{99}
+\bibitem{dec} Nota en The Go Blog sobre la \href{http://blog.golang.org/gos-declaration-syntax}{sintáxis de la declaración}.
+\bibitem{pa} FAQ sobre \href{https://golang.org/doc/faq#no_pointer_arithmetic}{aritmética de punteros}
+\end{thebibliography}
 
 \end{document}
