@@ -146,7 +146,7 @@ if p := prom(notas); p >= 7 {
 \subsubsection{switch}
 Se agrega un break automático al final de cada case. Entonces, a diferencia de C, para casos múltiples, en lugar de omitir un break, se hacen conjuntos separados por coma. Además, las expresiones de cada caso son más generales, ya que no necesitan ser constantes o siquiera enteros. 
 
-\begin{lstlisting}[caption = parsear de acciones de T.E.G. (strings)]
+\begin{lstlisting}[caption = parsear acciones de T.E.G. (switch sobre strings)]
 switch accion {
 	case "invadir": invadir(objetivo)
 	case "reagrupar": reagrupar()
@@ -165,9 +165,19 @@ switch {
 \end{lstlisting}
 
 \subsubsection{defer}
-Una función a la que se le antepone \lstinline|defer| (posponer) se ejecuta al final de la función que la contiene. Si hay \lstinline|defer| con más de una función, se ejecutan de forma LIFO.
+Una función a la que se le antepone \lstinline|defer| (posponer, diferir) se ejecuta al final de la función que la contiene. Si hay \lstinline|defer| con más de una función, se ejecutan de forma LIFO.
 
 \lstinputlisting[firstline = 5, caption = Hello World Alternativo]{codigo/defer.go}
+
+Una gran utilidad del defer es, dentro de las funciones que tienen muchos return en distintas circunstancias, usar una función diferida que tiene que ejecutarse en todos los casos de devolución, como por ejemplo, cerrar un archivo. \cite{defer}
+
+\section{Tipos de datos}
+\subsection{Básicos}
+\subsection{Structs}
+\subsection{Arrays}
+\subsection{Slices}
+\subsection{Runas y strings}
+\subsection{Funciones y clausuras}
 
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
@@ -183,6 +193,7 @@ Otra característica importante es \textit{stop-the-world} el cual pausa, al mom
 \begin{thebibliography}{99}
 \bibitem{dec} Nota en The Go Blog sobre la \href{http://blog.golang.org/gos-declaration-syntax}{sintáxis de la declaración}.
 \bibitem{pa} FAQ sobre \href{https://golang.org/doc/faq#no_pointer_arithmetic}{aritmética de punteros}.
+\bibitem{defer} Effective Go sobre \href{https://golang.org/doc/effective_go.html#defer}{el uso del defer}
 \end{thebibliography}
 
 \end{document}
