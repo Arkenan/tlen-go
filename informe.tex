@@ -50,7 +50,7 @@
 \section{Historia}
 % y un poco de lo general.
 % Compilador, formateador de codigo y demas.
-
+% Errores por no usar variables en lugar de warnings.
 \section{Sintaxis Básica}
 \subsection{Paquetes}
 Cada archivo de código fuente, independientemente de su nombre, aclara en la primera línea a qué paquete pertenece.
@@ -92,7 +92,7 @@ var (
 \end{lstlisting}
 \end{description}
 
-Al asignar en Go una variable a la otra, se asigna el valor, al estilo imperativo, con lo cual cambiar una no tendrá ningún efecto sobre la otra (como si sucedería en los lenguajes como Java, donde las variables son referencias).
+Al asignar en Go una variable a la otra, se asigna el valor, al estilo imperativo, con lo cual cambiar una no tendrá ningún efecto sobre la otra (como sí sucedería en los lenguajes como Java, donde las variables son referencias).
 
 Los punteros se declaran de la forma \lstinline|var a *int|. A diferencia de C, \emph{no hay aritmética de punteros}. Esta omisión fue pensada para aumentar la seguridad (evitar direcciones ilegales) y simplificar la implementación del recolector de basura.\cite{pa}
 %TODO ver el tema del make, que no se puede hacer personalizado.
@@ -123,9 +123,9 @@ La única estructura de control de ciclos en Go es el \lstinline|for|, que es lo
 \begin{description}
 	\item[Forma clásica:] \hfill \\
 		\lstinline|for i := 0; i < 10; i++ { fmt.Println(i) }|
-	\item[Omisiones:] El pre y el post pueden no ponerse (cualquier combinación es válida). Como queda solo la condición de corte, este es el caso que reemplaza al while. Ej: \\
+	\item[Omisiones:] El pre y el post pueden no ponerse (cualquier combinación es válida). Cuando queda solo la condición de corte, se da el caso que reemplaza al while: \\
 		\lstinline|for a < 1000 { a = a*a }|
-	\item[range:] para operar sobre arrays y slices (más adelante se ven), se puede usar \lstinline|range|. Es una forma primitiva que, junto a la función \lstinline|len| elimina la necesidad de máximos lógicos, constantes o variables referidas al tamaño. Se pueden omitir el índice o el valor con el operador \_:
+	\item[range:] para operar sobre arrays y slices (más adelante se ven), se puede usar \lstinline|range|. Es una forma primitiva que, junto a la función \lstinline|len|, elimina la necesidad de máximos lógicos, constantes o variables referidas al tamaño. Se pueden omitir el índice o el valor con el operador \_:
 	\begin{itemize}
 	\item \lstinline|for i,v := range arreglo {fmt.Println("indice:",i,"valor:",v)}|
 	\item \lstinline|for i := range arreglo {fmt.Println("indice:",i)}|
@@ -133,7 +133,7 @@ La única estructura de control de ciclos en Go es el \lstinline|for|, que es lo
 	\end{itemize}
 \end{description}
 \subsubsection{if}
-Igual que el clásico de C o C++, solo que se sigue el mismo criterio con los paréntesis y las llaves y se puede agregar un pre (paso inicial, previo al if), al igual que en el for. Al igual que para el for, \emph{cualquier variable definida en el pre vivirá solo en el scope del if (y del else)}. %TODO ver si hay otra forma de decir pre y post.
+Igual que el clásico de C o C++, solo que se sigue el mismo criterio con los paréntesis y las llaves y se puede agregar un pre (paso inicial, previo al if), al igual que en el for. De la misma forma, \emph{cualquier variable definida en el pre vivirá solo en el scope del if (y del else)}. %TODO ver si hay otra forma de decir pre y post.
 \begin{lstlisting}[caption = promedio precalculado.]
 // Al calcular p en el pre, no hay que calcularlo de nuevo adentro del if.
 if p := prom(notas); p >= 7 {
@@ -172,10 +172,89 @@ Una función a la que se le antepone \lstinline|defer| (posponer, diferir) se ej
 Una gran utilidad del defer es, dentro de las funciones que tienen muchos return en distintas circunstancias, usar una función diferida que tiene que ejecutarse en todos los casos de devolución, como por ejemplo, cerrar un archivo. \cite{defer}
 
 \section{Tipos de datos}
-\subsection{Básicos}
+Go tiene tipado estático (en tiempo de compilación) y fuerte. Las variables o bien son declaradas con un cierto tipo o lo infieren de la parte derecha de una asignación, luego de lo cual no pueden cambiar su tipo. Lo más parecido a tipado dinámico son las interfaces, que se verán más adelante.
+
+Estos son los tipos básicos de Go:
+\begin{description}
+\item[Booleanos:] \lstinline|bool|.
+\item[Cadenas:] \lstinline|string|.
+\item[Enteros:] \lstinline|int  int8  int16  int32  int64|.
+\item[Sin signo:] \lstinline|uint uint8 uint16 uint32 uint64 uintptr|.
+\item[Bytes:] \lstinline|byte|. Alias de uint8.
+\item[Caracteres:] \lstinline|rune|. Alias de int32, se verá más adelante, representa un punto de Unicode.
+\item[Flotantes:] \lstinline|float32 float64|
+\item[Complejos:] \lstinline|complex64 complex128|
+\end{description}
+
+Cada tipo tiene un \emph{zero value}, que es un valor en el que se inicializa la variable si no se especifica uno al declararla. Para los valores numéricos es 0, para las strings, la cadena vacía y para estructuras complejas suele ser nil.
+
+%TODO ver casos raros para inferencia, como variables que todavía no tienen valor, y demás.
+La \emph{inferencia} es bastante simple, ya que es un lenguaje tipado. Cuando se usa el operador := con una variable del lado derecho, la del lado izquierdo adquiere su mismo tipo. 
+
+El caso más raro es el de las constantes numéricas, que son de alta precisión y no tienen un tipo, sino que proveen el tipo necesario para las operaciones que se hagan sobre ellas. 
+\lstinputlisting[caption = Constantes Comodines]{codigo/constantes.go}
+El caso anterior produce el siguiente output: 
+\begin{verbatim}
+La variable es de tipo int y tiene valor: 5.
+La variable es de tipo float32 y tiene valor: 5.
+La variable es de tipo float32 y tiene valor: 5e+19.
+\end{verbatim}
+Esto muestra justamente lo propuesto de que la constante provee el tipo necesitado. Sin embargo, esto tiene sus excepciones, como es el caso de c2. Esta constante es un número muy grande como para  proveer un valor de tipo int, con lo cual si se quitan las barras de comentario de la última línea del main, el programa falla en tiempo de compilación: 
+
+\begin{verbatim}
+./constantes.go:20: constant 50000000000000000000 overflows int
+\end{verbatim}
+
+Como se decía antes, hay que notar que este comportamiento de comodín es \emph{solo para constantes}. La conversión de tipos entre variables es \emph{siempre explícita}.
+
+\lstinputlisting[caption = asignación ilegal.]{codigo/variables.go}
+Produce el siguiente mensaje de error:
+\begin{verbatim}
+./variables.go:6: cannot use entera (type int) as type float32 in assignment
+\end{verbatim}
+Para hacerlo correctamente hay que explicitar la conversión:
+\lstinputlisting[caption = conversión legal.]{codigo/variablesbien.go}
+
+Si creamos tipos propios o queremos hacer funciones que conviertan de un tipo a otro que son muy distintos, podemos hacer uso de interfaces y switches sobre tipos. Más adelante %TODO linkear
+se explica este caso.
+
+En adelante se detallan algunos tipos de datos específicos:
+
 \subsection{Structs}
+Prácticamente iguales a los de C. Para usarlos, se define un tipo basado en struct de la siguiente manera:
+\begin{lstlisting}[caption = declaración de structs]
+type vertice struct{
+	x int
+	y int
+	z int
+}
+\end{lstlisting}
+
+Son la forma empaquetada nativa de Go. Se pueden asignar structs literales de la siguiente forma: \lstinline| v := vertice{1,2,3}|. Se puede inicializar un campo específico (\lstinline|v := vertice{x:1, z:2}|) y los que queden sin asignar tendrán zero values.
+
+Para acceder a sus campos se usa, por ejemplo para el x, v.x.
+
+\paragraph{Transparencia de punteros:} los punteros a registros son transparentes para el acceso a los campos:
+
+\begin{lstlisting}[caption = transparencia de punteros.]
+pv := &vertice{10,20,30} // se crea un puntero a un vertice.
+fmt.Println(pv.x) // se imprime el primer campo (10).
+\end{lstlisting}
 \subsection{Arrays}
+La forma básica de almacenamiento secuencial. Más allá de su implementación interna, una variable que es un array, \emph{no es un puntero}. Si se hace un puntero al array no apunta a su primer elemento, si no a la variable que lo contiene (recordar que no hay aritmética de punteros).
+\begin{description}
+	\item[Declaracion:] \hfill \\
+	\lstinline|var arr [5]int // 5 es el "element count"|\\
+	Es importante tener en cuenta que el element count es parte del tipo: [5]int y [6]int son tipos diferentes.
+	\item[Literales:] \hfill \\
+		\lstinline|arr := [5]int{1,2,3,4,5}|
+	\item[Conteo automático:] a través del operador ``...'' \\
+		\lstinline|arr := [...]int{1,2,3,4,5}|
+\end{description}
+
+Como última nota: si a un array no se le especifican valores con una inicialización, todas sus posiciones son inicializadas en el zero value del tipo base.
 \subsection{Slices}
+Forma dinámica secuencial nativa de Go. %TODO terminar.
 \subsection{Runas y strings}
 \subsection{Funciones y clausuras}
 
