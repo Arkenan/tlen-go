@@ -342,7 +342,48 @@ Bytes:
 \end{verbatim}
 En el ejemplo anterior se ve, justamente, que si se mira byte a byte, los caracteres de más de un byte de Unicode, el output de aquellos será incomprensible. Esto es lo que ocurre cuando, por ejemplo, en una página en español no está fijado el encoding UTF-8 para traducir de secuencias de bytes a caracteres Unicode. Este encoding, no casualmente, fue inventado por Rob Pike y Ken Thomson \cite{unicode}, dos de los tres creadores del lenguaje Go.
 \subsection{Mapas}
+Un mapa es un conjunto de pares de claves y valores. Es como un arreglo, pero su tipo de base no son los numeros enteros, sino que puede ser cualquier tipo de Go, nativo o declarado por el usuario. Es similar a los mapas de C++, de python, etc.
+\begin{description}
+	\item[Declaración:] con make. \\
+		\lstinline|m := make(map[string]string)|
+	\item[Asignación:] cambiar el valor para una clave, y de no existir la clave, la crea: \\
+		\lstinline|m["palabra"] = "conjunto de letras" // Literalmente, un diccionario.|
+	\item[Mapas Literales:] del estilo de los structs.
+\begin{lstlisting}[caption = metal]
+m := map[rune]int{
+	'a':1
+	'b':2
+	'c':3
+}
+\end{lstlisting}
+	\item[Borrar una clave:] \hfill \\
+		\lstinline|delete(mapa, clave)|
+	\item[Ver el valor de una clave:] es una asignación doble. Por un lado se obtiene la clave y por el otro un booleano que determina si esa clave efectivamente existe en el mapa. Si no se encontró, como clave devuelve el zero value de su tipo. \\
+		\lstinline|valor, ok := m[k] // Si se omite el ok solo se devuelve el valor.|
+\end{description}
+
 \subsection{Funciones y clausuras}
+En Go las funciones son valores, ya que se tratan como ciudadanos de primera clase (First class citizens).
+\begin{lstlisting}[caption = asignación y uso.]
+f := func(int a, int b) { return a + b }
+fmt.Println(f(3,4)) // 7
+\end{lstlisting}
+Al ser ciudadanos de primer orden, pueden pasarse como argumentos de otras funciones.
+\lstinputlisting[firstline = 5, caption = Map con funciones de alto orden.]{codigo/funcionesPorArgumento.go}
+Output: 
+\begin{verbatim}
+[1 4 9 16 25]
+[0 1 1 2 2]
+\end{verbatim}
+
+\paragraph{Clausuras:} una función que es creada como valor en un momento dado adquiere acceso global a todas las variables en su entorno. En particular, si este entorno muere, sigue viviendo para la función. A este conjunto función-entorno se lo llama ``clausura''.
+\lstinputlisting[firstline = 5, caption = función generadora de clausuras.]{codigo/functionValues.go}
+Output:\\
+\verb|20 30 35|
+
+La función countFrom es una generadora de funciones de enteros en enteros. Cada una de las generadas tendrá como diferencia entre sí el número con el cual se comienza a contar (asignación sum := n). Cada vez que se invoque a countFrom(n) se creará una nueva función contadora a partir de n. Las clausuras usadas de esta manera emulan estado, y es lo que se usa en Oz para el modelo seguro, empaquetado y declarativo de implementación de TDAs.
+
+\section{Métodos}
 
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
