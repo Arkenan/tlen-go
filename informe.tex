@@ -383,6 +383,18 @@ Output:\\
 
 La función countFrom es una generadora de funciones de enteros en enteros. Cada una de las generadas tendrá como diferencia entre sí el número con el cual se comienza a contar (asignación sum := n). Cada vez que se invoque a countFrom(n) se creará una nueva función contadora a partir de n. Las clausuras usadas de esta manera emulan estado, y es lo que se usa en Oz para el modelo seguro, empaquetado y declarativo de implementación de TDAs.
 
+
+\subsection{Tipos de Datos en Go según los criterios de Ole Dahl}
+El teórico Noruego, en su trabajo Structured programming\cite{ole}, junto con Dijkstra y Hoare, estableció una serie de tipos de datos que debían ser representables en un lenguaje de programación. Según los que vimos en clase, los siguientes tienen su correspondiente representación en Go:
+\begin{description}
+\item[Producto Cartesiano:] El producto cartesiano entre conjuntos produce un conjunto de tuplas con un elemento de cada conjunto. En Go, esta función la cumplen los \emph{structs}.
+\item[Unión Disjunta:] esta es la unión entre conjuntos disjuntos. En C es ``union'', aquí hay un equivalente, que son las \emph{interfaces}, vistas más adelante, que agrupan tipos según los métodos.
+\item[Funciones discretas finitas:] los \emph{mapas} establecen relaciones entre dos conjuntos cualesquiera, cumpliendo este requerimiento.
+\item[Partes de un conjunto (sets):] si bien no hay un tipo de datos nativo, son muy fácilmente representables \emph{con mapas con valores booleanos}. De hecho, esta es la forma recomendada de implementarlos según los creadores\cite{sets}.
+\item[Secuencias:] \emph{slices} como listas. Más adelante se verán otras implementaciones con channels. %TODO revisar.
+\end{description}
+
+
 \section{Métodos}
 
 \section{Recolector de Basura}
@@ -402,6 +414,8 @@ Otra característica importante es \textit{stop-the-world} el cual pausa, al mom
 \bibitem{defer} Effective Go sobre \href{https://golang.org/doc/effective_go.html#defer}{el uso del defer}
 \bibitem{slices} Go blog sobre el \href{http://blog.golang.org/go-slices-usage-and-internals}{uso y los manejos internos de las slices}.
 \bibitem{unicode} Artículo de wikipedia sobre \href{https://es.wikipedia.org/wiki/UTF-8}{UTF-8}
+\bibitem{ole} \href{http://dl.acm.org/citation.cfm?id=1243380}{Página de la ACM Library sobre el libro}
+\bibitem{sets} Nota en Go Blog sobre el  \href{http://blog.golang.org/go-maps-in-action}{uso de mapas en Go}
 \end{thebibliography}
 
 \end{document}
