@@ -215,7 +215,7 @@ Produce el siguiente mensaje de error:
 Para hacerlo correctamente hay que explicitar la conversión:
 \lstinputlisting[caption = conversión legal.]{codigo/variablesbien.go}
 
-Si creamos tipos propios o queremos hacer funciones que conviertan de un tipo a otro que son muy distintos, podemos hacer uso de interfaces y switches sobre tipos. Más adelante %TODO linkear
+Si creamos tipos propios o queremos hacer funciones que conviertan de un tipo a otro que son muy distintos, podemos hacer uso de interfaces, reflexión y switches sobre tipos. Más adelante %TODO linkear
 se explica este caso.
 
 En adelante se detallan algunos tipos de datos específicos:
@@ -250,12 +250,62 @@ La forma básica de almacenamiento secuencial. Más allá de su implementación 
 		\lstinline|arr := [5]int{1,2,3,4,5}|
 	\item[Conteo automático:] a través del operador ``...'' \\
 		\lstinline|arr := [...]int{1,2,3,4,5}|
+	\item[Inicialización por default:]  si a un array no se le especifican valores con una inicialización, todas sus posiciones son inicializadas en el zero value del tipo base.
+	\item[Longitud:] es parte de la variable y se accede a ella con la función \lstinline|len(arr)|
 \end{description}
 
-Como última nota: si a un array no se le especifican valores con una inicialización, todas sus posiciones son inicializadas en el zero value del tipo base.
 \subsection{Slices}
-Forma dinámica secuencial nativa de Go. %TODO terminar.
+Forma dinámica secuencial nativa de Go. Se llaman ``slices'' (porciones) porque una de las formas de crearlas es por ``cortando'' un array. Como son dinámicas (pueden crecer en tamaño) tienen dos atributos, longitud (\lstinline|len|) y capacidad (\lstinline|cap|). %TODO bajar redundancia acá.
+\begin{description}
+	\item[Creación:] al igual que otras estructuras complejas, se crean con la función \lstinline|make|, especificando la longitud (tamaño inicial) y la capacidad (hasta donde pueden crecer sin pedir memoria):
+	\begin{itemize}
+		\item \lstinline|s := make([]int,5)   // len=5 cap=5|
+		\item \lstinline|s := make([]int,0,5) // len=0 cap=5|
+	\end{itemize}
+	Así como el tipo de los arrays de enteros es [n]int, el de las slices es []int, donde no se especifica el tamaño. Esto significa que una slice de 20 elementos es del mismo tipo que una de 30. El tipo de la variable a crear es siempre el primer argumento de \lstinline|make|.
+	\item[Literales:] \hfill \\
+		\lstinline|s := []int{1,2,3} // crea una slice de ints con len=3, cap=3|
+	\item[Cortando (slicing) arrays:] se especifica el índice del primer elemento (inclusivo) y el último (no inclusivo). Esta diferencia surge de la conveniencia para ver rápidamente el tamaño de la slice restando el segundo número por el primero. O sea, si la slice tiene índices [a,b), entonces su longitud será b - a.
+\begin{lstlisting}[caption = slices desde arrays]
+a := [...]int{1,2,3,4,5}
+s := a[2:4] // s == [3,4]
+\end{lstlisting}	
+\end{description}
+
+En el caso particular de sacar slices de arrays, los datos no se duplican: los elementos de la slice corresponden a la misma porción de memoria\cite{slices}. Por lo tanto, al modificar una estructura se modifica la otra, y vice-versa. Esto, sin embargo, no hace que sean iguales, o siquiera comparables: las slices solo pueden usar el operador == con un \lstinline|nil| del otro lado. El \lstinline|nil|, justamente, es el zero value de este tipo de datos, y representa una slice vacía.
+
+\paragraph{Re-Slice:} una slice puede ser cortada de nuevo, ya sea en porciones más pequeñas, o más grandes.
+\begin{lstlisting}[caption = cortando hacia derecha o hacia izquierda.]
+s1 := []int{1,2,3,4}
+s2 := s1[:2] // s2 es [1,2] tiene capacidad 4.
+s3 := s2[:3] // s3 es [1,2,3] con capacidad 4.
+s4 := s1[2:] // s4 es [3,4] tiene capacidad 2.
+\end{lstlisting}
+En el caso anterior, s2 y s4 son cortes más pequeños que el original, mientras que s3 es un corte más grande (mayor \lstinline|len|) a s2, del cual viene. Una limitación:
+\begin{lstlisting}[caption = re-slice ilegal.]
+s1 := []int{1,2,3,4}
+s2 := s1[:5]
+\end{lstlisting}
+Si se intentara cortar hacia afuera más allá de la capacidad, esto produce un error en tiempo de ejecución, ya que es un tipo secuencial y más allá de su capacidad puede haber memoria reservada.
+
+\paragraph{Redimensión:} como se ha dicho, la slice es un tipo dinámico, y si se quiere aumentar la capacidad del mismo, esto se hace (internamente) creando una slice nueva con una capacidad mayor y copiando elemento a elemento\cite{slices} con la función \lstinline|copy|. Externamente, sin embargo, existe la función \lstinline|append|, que agrega un elemento al final de la slice, y si sobrepasa la capacidad, se encarga de reubicarla según lo recién descripto.
+\begin{lstlisting}[caption = append]
+var s1 []int // s1 == nil
+s1 = append(s1, 2, 3, 5, 7) // append a un nil es como a una lista vacia.
+s2 := []int{10, 20, 30}
+s3 := append(s2,s1...) // el operador ... expande s1 para pasar elemento por elemento.
+s3[5] = 4
+fmt.Println(s1, s3)
+\end{lstlisting}
+Esto produce como output:
+\begin{verbatim}
+[2 3 5 7] [10 20 30 2 3 4 7]
+\end{verbatim}
+Al modificar s3[5] no se modifica s1, ya que lo que se agrega a s3 en el append no es s1 en sí, sino sus elemntos uno a uno con el operador ``...''.
+
+Las funciones \lstinline|copy|, \lstinline|append|, \lstinline|len| y \lstinline|cap| están implementadas de forma abierta, desempaquetada y declarativa, ya que nunca se modifica el original, sino que se devuelve la versión modificada. Sin embargo, el tipo de datos posee estado mutable, lo que se ve sencillamente cambiando el valor de un elemento como en la línea 5 del anterior fragmento de código. Este estilo mixto es muy característico de los tipos de datos estructurados de Go.
 \subsection{Runas y strings}
+\subsection{Mapas}
 \subsection{Funciones y clausuras}
 
 \section{Recolector de Basura}
@@ -273,6 +323,7 @@ Otra característica importante es \textit{stop-the-world} el cual pausa, al mom
 \bibitem{dec} Nota en The Go Blog sobre la \href{http://blog.golang.org/gos-declaration-syntax}{sintáxis de la declaración}.
 \bibitem{pa} FAQ sobre \href{https://golang.org/doc/faq#no_pointer_arithmetic}{aritmética de punteros}.
 \bibitem{defer} Effective Go sobre \href{https://golang.org/doc/effective_go.html#defer}{el uso del defer}
+\bibitem{slices} Go blog sobre el \href{http://blog.golang.org/go-slices-usage-and-internals}{uso y los manejos internos de las slices}.
 \end{thebibliography}
 
 \end{document}
