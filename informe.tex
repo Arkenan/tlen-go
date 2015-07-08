@@ -33,6 +33,9 @@
 	frame = tb,
 	showstringspaces = false,
 	breaklines = true,
+	escapeinside={\%*}{*)},
+	extendedchars=true,
+	literate = {ô}{{\^{o}}}1 {ó}{{\'{o}}}1 {á}{{\'{a}}}1 {é}{{\'{e}}}1 {í}{{\'{i}}}1 {ú}{{\'{u}}}1
 }
 
 \begin{document}
@@ -47,6 +50,9 @@
 \author{Cristian Gonzalez \and Tomás Arjovsky}
 \date{1$^{er}$ Cuatrimestre, 2015}
 \maketitle
+
+\tableofcontents
+
 \section{Historia}
 % y un poco de lo general.
 % Compilador, formateador de codigo y demas.
@@ -76,7 +82,7 @@ Las variables en Go son declaradas de forma inversa al C, pareciéndose más a l
 	\item[Declaración:]\hfill \\
 		\lstinline|var a,b,c int|
 	\item[Inicialización en declaración:] \hfill \\
-		\lstinline|var a,b,c int = 1,2,3 // Hay asignacion multiple!|
+		\lstinline|var a,b,c int = 1,2,3 // Hay asignación múltiple!|
 	\item[Inferencia de Tipos:] para constantes y variables. \\
 		\lstinline|var c = 1 // c pasa a ser de tipo int.|
 	\item[Forma Compacta:] \hfill \\
@@ -151,7 +157,7 @@ switch accion {
 	case "invadir": invadir(objetivo)
 	case "reagrupar": reagrupar()
 	case "pedir tarjeta", "tarjeta": sacarCarta(mazo)
-	default: fmt.Println("Opcion desconocida")
+	default: fmt.Println("Opción desconocida")
 }
 \end{lstlisting}
 Si no se especifica ninguna variable en el switch se asume \lstinline|switch true|, con lo cual se evalúan expresiones booleanas. Como los casos se evalúan de arriba hacia abajo en orden, el switch a secas es una forma prolija de anidar ifs.
@@ -210,7 +216,8 @@ Como se decía antes, hay que notar que este comportamiento de comodín es \emph
 \lstinputlisting[caption = asignación ilegal.]{codigo/variables.go}
 Produce el siguiente mensaje de error:
 \begin{verbatim}
-./variables.go:6: cannot use entera (type int) as type float32 in assignment
+./variables.go:6: cannot use entera (type int) as type float32
+ in assignment
 \end{verbatim}
 Para hacerlo correctamente hay que explicitar la conversión:
 \lstinputlisting[caption = conversión legal.]{codigo/variablesbien.go}
@@ -291,7 +298,7 @@ Si se intentara cortar hacia afuera más allá de la capacidad, esto produce un 
 \paragraph{Redimensión:} como se ha dicho, la slice es un tipo dinámico, y si se quiere aumentar la capacidad del mismo, esto se hace (internamente) creando una slice nueva con una capacidad mayor y copiando elemento a elemento\cite{slices} con la función \lstinline|copy|. Externamente, sin embargo, existe la función \lstinline|append|, que agrega un elemento al final de la slice, y si sobrepasa la capacidad, se encarga de reubicarla según lo recién descripto.
 \begin{lstlisting}[caption = append]
 var s1 []int // s1 == nil
-s1 = append(s1, 2, 3, 5, 7) // append a un nil es como a una lista vacia.
+s1 = append(s1, 2, 3, 5, 7) // append a un nil es como a una lista vacía.
 s2 := []int{10, 20, 30}
 s3 := append(s2,s1...) // el operador ... expande s1 para pasar elemento por elemento.
 s3[5] = 4
@@ -305,6 +312,35 @@ Al modificar s3[5] no se modifica s1, ya que lo que se agrega a s3 en el append 
 
 Las funciones \lstinline|copy|, \lstinline|append|, \lstinline|len| y \lstinline|cap| están implementadas de forma abierta, desempaquetada y declarativa, ya que nunca se modifica el original, sino que se devuelve la versión modificada. Sin embargo, el tipo de datos posee estado mutable, lo que se ve sencillamente cambiando el valor de un elemento como en la línea 5 del anterior fragmento de código. Este estilo mixto es muy característico de los tipos de datos estructurados de Go.
 \subsection{Runas y strings}
+Go acepta en su código fuente cualquier caracter Unicode. En lugar de caracteres al estilo ``char'', Go tiene runes (alias de uint32), que representan Unicode points. Uno caracter de este tipo puede tener ser de hasta 4 bytes, ya que el conjunto incluye símbolos Japoneses, árabes, acentos, cirílicos, y muchos otros.
+
+Por otro lado, contrario a muchos lenguajes, las strings no son cadenas de caracteres, si no que son cadenas de bytes (alias de uint8). Para compatibilizar la conversión ida y vuelta entre bytes individuales y puntos de Unicode, que son de 1 a 4 bytes, se usa el encoding UTF-8, que está incorporado nativamente al procesamiento del código fuente de Go.
+\lstinputlisting[firstline = 5, caption = ejemplo de byte vs runa.]{codigo/runas.go}
+Da como output:
+\begin{verbatim}
+el valor es Allô! y su longitud es 6
+\end{verbatim}
+Esto muestra que si bien la palabra ``Allô!'' tiene 5 caracteres, la longitud de la slice de bytes es de 6, lo cual significa que la runa ô ocupa 2 bytes. 
+
+Para ver un detalle de la comparación, \lstinline|range| itera sobre runas, mientras que para ir byte a byte se trata a la string como un array: 
+\lstinputlisting[caption = detalle de byte vs runa.]{codigo/detalleRunas.go}
+Output:
+\begin{verbatim}
+Runas:
+0: 'M', que es de tipo int32
+1: 'i', que es de tipo int32
+2: 'r', que es de tipo int32
+3: 'á', que es de tipo int32
+5: '!', que es de tipo int32
+Bytes:
+0: 'M', que es de tipo uint8
+1: 'i', que es de tipo uint8
+2: 'r', que es de tipo uint8
+3: 'Ã', que es de tipo uint8
+4: '¡', que es de tipo uint8
+5: '!', que es de tipo uint8
+\end{verbatim}
+En el ejemplo anterior se ve, justamente, que si se mira byte a byte, los caracteres de más de un byte de Unicode, el output de aquellos será incomprensible. Esto es lo que ocurre cuando, por ejemplo, en una página en español no está fijado el encoding UTF-8 para traducir de secuencias de bytes a caracteres Unicode. Este encoding, no casualmente, fue inventado por Rob Pike y Ken Thomson \cite{unicode}, dos de los tres creadores del lenguaje Go.
 \subsection{Mapas}
 \subsection{Funciones y clausuras}
 
@@ -324,6 +360,7 @@ Otra característica importante es \textit{stop-the-world} el cual pausa, al mom
 \bibitem{pa} FAQ sobre \href{https://golang.org/doc/faq#no_pointer_arithmetic}{aritmética de punteros}.
 \bibitem{defer} Effective Go sobre \href{https://golang.org/doc/effective_go.html#defer}{el uso del defer}
 \bibitem{slices} Go blog sobre el \href{http://blog.golang.org/go-slices-usage-and-internals}{uso y los manejos internos de las slices}.
+\bibitem{unicode} Artículo de wikipedia sobre \href{https://es.wikipedia.org/wiki/UTF-8}{UTF-8}
 \end{thebibliography}
 
 \end{document}
