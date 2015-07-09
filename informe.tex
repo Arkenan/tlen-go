@@ -394,8 +394,16 @@ El teórico Noruego, en su trabajo Structured programming\cite{ole}, junto con D
 \item[Secuencias:] \emph{slices} como listas. Más adelante se verán otras implementaciones con channels. %TODO revisar.
 \end{description}
 
-
 \section{Métodos}
+Los métodos son funciones empaquetadas, para un tipo de datos determinado. Es un pequeño acercamiento al diseño orientado a objetos, solo que se declaran y se usan siempre de forma pública.
+
+\paragraph{Declaración:} se le especifica a una función qué tipo será el que reciba el método antes del nombre de la firma. Solo se pueden definir métodos para tipos creados en el paquete. Si se debe hacer métodos para un tipo nativo, se puede hacer un alias.
+
+\lstinputlisting[caption = uso de métodos]{codigo/metodoNorma.go}
+Output: \verb|7.0710678118654755|
+
+Sin embargo, más allá de la forma empaquetada, hay que tener en cuenta que internamente la variable del tipo recibidor es pasada como un parámetro más al método. %link!
+En go, todo parámetro que se pase es pasado por valor, con lo cual si se quiere modificar en una función a la variable original, se deberá pasar un puntero. Lo mismo aplica a los métodos, pero con una comodidad añadida: si un método recibe un puntero, al llamar a al método para ese tipo la se agrega la dirección automáticamente. %link!
 
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
