@@ -50,9 +50,9 @@
 \author{Cristian Gonzalez \and Tomás Arjovsky}
 \date{1$^{er}$ Cuatrimestre, 2015}
 \maketitle
-
+\newpage
 \tableofcontents
-
+\newpage
 \section{Historia}
 % y un poco de lo general.
 % Compilador, formateador de codigo y demas.
@@ -416,8 +416,51 @@ Output:
 \section{Interfaces}
 Las interfaces, como se describieron anteriormente, son tipos que agrupan a otros según los métodos que reciben. Son la única forma de unión disjunta en Go.
 
-A diferencia de las interfaces en Java, no se especifica si un tipo implementa o no una interfaz, sino que se chequea 
+A diferencia de las interfaces en Java, no se especifica si un tipo implementa o no una interfaz, sino que se chequea en tiempo de compilación si el tipo del lado derecho de la asignación puede o no recibir los métodos. El objetivo de esta decisión era fomentar la definición de interfaces sin preocuparse por cambiar el código en todos los tipos previamente existentes que la implementen\cite{implements}.
 
+\lstinputlisting[caption = uso de interfaces, firstline = 5]{codigo/interfaces.go}
+Error al compilar:
+\begin{verbatim}
+# command-line-arguments
+./interfaces.go:37: cannot use c (type camion) as type reidor in assignment:
+	camion does not implement reidor (missing reir method)
+\end{verbatim}
+
+Cabe aclarar que se diferencian para las interfaces punteros y valores, ya que los métodos se definen para unos o para los otros. Si un método está definido para punteros y a la interfaz se le asigna un valor, el compilador indicará que la variable no implementa el método requerido.
+
+Además de las interfaces definidas por el usuario, hay muchas predefinidas en el lenguaje, con lo cual se pueden crear tipos nuevos que sean utilizables para funciones nativas de Go.
+
+\subsection{Stringers}
+Un stringer es todo tipo de datos que pueda representarse como string:
+\begin{lstlisting}[caption = firma de stringers]
+type Stringer interface{
+	String() string
+}
+\end{lstlisting}
+Esta interfaz está definida en el paquete \verb|fmt| y se utiliza en funciones como \verb|Println| y \verb|Printf| para la impresión de variables.
+
+\subsection{Errores}
+En Go no hay excepciones propiamente dichas como tipo de datos. Un error es una interfaz que puede representarse a si mismo como string mediante un método Error(). Esta interfaz también pertenece al paquete \verb|fmt| y es una de las que buscan las funciones de impresión para formatear.
+
+\begin{lstlisting}[caption = firma de errores]
+type error interface {
+    Error() string
+}
+\end{lstlisting}
+
+En general, cuando una función puede devolver un error, se lo hace por asignación múltiple como último valor de devolución. Si el valor devuelto no es \lstinline|nil|, entonces se maneja el error como sea necesario, a modo de try-catch.
+
+\lstinputlisting[caption = uso de errores, firstline = 5]{codigo/errores.go}
+Output: 
+\begin{verbatim}
+Fuera de rango: no se puede colocar el elemento "Omelete du 
+fromage" en el lugar 5 de la slice ["Palabra" "Word" "Omelete au
+fromage"]
+\end{verbatim}
+
+En el caso de que el programa no pueda continuar bajo ninguna circunstancia, debe usarse el \lstinline|panic|, pero su uso no está recomendado.
+
+\section{Concurrencia}
 
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
@@ -440,6 +483,7 @@ Otra característica importante es \textit{stop-the-world} el cual pausa, al mom
 \bibitem{sets} Nota en Go Blog sobre el  \href{http://blog.golang.org/go-maps-in-action}{uso de mapas en Go}.
 \bibitem{method_int} FAQ de Go sobre \href{http://golang.org/doc/faq#methods_on_values_or_pointers}{punteros contra valores en los métodos}.
 \bibitem{methods_ef} Effective Go sobre \href{https://golang.org/doc/effective_go.html#methods}{métodos}.
+\bibitem{implements} FAQ de Go sobre \href{https://golang.org/doc/faq#implements_interface}{por qué no hay ``implements'' en Go}.
 \end{thebibliography}
 
 \end{document}
