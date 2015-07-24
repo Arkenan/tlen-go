@@ -33,8 +33,8 @@
 	frame = tb,
 	showstringspaces = false,
 	breaklines = true,
-	escapeinside={\%*}{*)},
-	extendedchars=true,
+	escapeinside= {\%*}{*)},
+	extendedchars= true,
 	literate = {ô}{{\^{o}}}1 {ó}{{\'{o}}}1 {á}{{\'{a}}}1 {é}{{\'{e}}}1 {í}{{\'{i}}}1 {ú}{{\'{u}}}1
 }
 
@@ -402,8 +402,22 @@ Los métodos son funciones empaquetadas, para un tipo de datos determinado. Es u
 \lstinputlisting[caption = uso de métodos]{codigo/metodoNorma.go}
 Output: \verb|7.0710678118654755|
 
-Sin embargo, más allá de la forma empaquetada, hay que tener en cuenta que internamente la variable del tipo recibidor es pasada como un parámetro más al método. %link!
-En go, todo parámetro que se pase es pasado por valor, con lo cual si se quiere modificar en una función a la variable original, se deberá pasar un puntero. Lo mismo aplica a los métodos, pero con una comodidad añadida: si un método recibe un puntero, al llamar a al método para ese tipo la se agrega la dirección automáticamente. %link!
+Sin embargo, más allá de la forma empaquetada, hay que tener en cuenta que el recibidor del método se comporta de la misma manera en la función que si se hubiera pasado como un argumento\cite{method_int}. 
+En go, todo parámetro de una función es pasado por valor, con lo cual si se quiere modificar al argumento original, se deberá pasar un puntero. Lo mismo aplica a los métodos, pero con una comodidad añadida: si un método se define para punteros, al llamarlo para ese tipo, el operador de dirección es agregado automáticamente en la compilación\cite{methods_ef}. 
+
+En el siguiente ejemplo se ve una posible implementación de cómo agregar un elemento a una slice. Si hay que agrandarla, se modificará la variable original, con lo cual es necesario que el método sea para punteros. Sin embargo, en el main, se puede mandar el método a \verb|s| directamente por lo explicado anteriormente. 
+\lstinputlisting[caption = modificando una slice.]{codigo/metodoAppend.go}
+Output: 
+\begin{verbatim}
+[1 2 3] tiene longitud 3 y capacidad 3
+[1 2 3 20] tiene longitud 4 y capacidad 6
+\end{verbatim}
+
+\section{Interfaces}
+Las interfaces, como se describieron anteriormente, son tipos que agrupan a otros según los métodos que reciben. Son la única forma de unión disjunta en Go.
+
+A diferencia de las interfaces en Java, no se especifica si un tipo implementa o no una interfaz, sino que se chequea 
+
 
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
@@ -419,11 +433,13 @@ Otra característica importante es \textit{stop-the-world} el cual pausa, al mom
 \begin{thebibliography}{99}
 \bibitem{dec} Nota en The Go Blog sobre la \href{http://blog.golang.org/gos-declaration-syntax}{sintáxis de la declaración}.
 \bibitem{pa} FAQ sobre \href{https://golang.org/doc/faq#no_pointer_arithmetic}{aritmética de punteros}.
-\bibitem{defer} Effective Go sobre \href{https://golang.org/doc/effective_go.html#defer}{el uso del defer}
+\bibitem{defer} Effective Go sobre \href{https://golang.org/doc/effective_go.html#defer}{el uso del defer}.
 \bibitem{slices} Go blog sobre el \href{http://blog.golang.org/go-slices-usage-and-internals}{uso y los manejos internos de las slices}.
-\bibitem{unicode} Artículo de wikipedia sobre \href{https://es.wikipedia.org/wiki/UTF-8}{UTF-8}
-\bibitem{ole} \href{http://dl.acm.org/citation.cfm?id=1243380}{Página de la ACM Library sobre el libro}
-\bibitem{sets} Nota en Go Blog sobre el  \href{http://blog.golang.org/go-maps-in-action}{uso de mapas en Go}
+\bibitem{unicode} Artículo de wikipedia sobre \href{https://es.wikipedia.org/wiki/UTF-8}{UTF-8}.
+\bibitem{ole} \href{http://dl.acm.org/citation.cfm?id=1243380}{Página de la ACM Library sobre el libro.}
+\bibitem{sets} Nota en Go Blog sobre el  \href{http://blog.golang.org/go-maps-in-action}{uso de mapas en Go}.
+\bibitem{method_int} FAQ de Go sobre \href{http://golang.org/doc/faq#methods_on_values_or_pointers}{punteros contra valores en los métodos}.
+\bibitem{methods_ef} Effective Go sobre \href{https://golang.org/doc/effective_go.html#methods}{métodos}.
 \end{thebibliography}
 
 \end{document}
