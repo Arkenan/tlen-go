@@ -5,17 +5,20 @@ import "fmt"
 type sliceEnteros []int
 
 func (s *sliceEnteros) agregar(elemento int) {
+	l := len(*s)
+	c := cap(*s)
 	var sret sliceEnteros
-	if len(*s)+1 > cap(*s) {
-		sret = sliceEnteros(make([]int, len(*s), 2*cap(*s)))
+	
+	if l + 1 > c {
+		sret = sliceEnteros(make([]int, l, 2*c))
 		for i, v := range *s {
 			sret[i] = v
 		}
 	} else {
 		sret = *s
 	}
-	sret = sret[:len(sret)+1]
-	sret[len(sret)-1] = elemento
+	sret = sret[:l+1]
+	sret[l] = elemento
 
 	// Acá es donde se modifica el valor original.
 	*s = sret
