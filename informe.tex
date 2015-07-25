@@ -21,6 +21,7 @@
 \renewcommand{\lstlistingname}{Fragmento}
 \lstset{
 	language = go,
+	tabsize = 4,
 	numbers = left,
 	%Keywords
 	keywordstyle = {[1]\color{orange}\bfseries},
@@ -462,6 +463,129 @@ En el caso de que el programa no pueda continuar bajo ninguna circunstancia, deb
 
 \section{Concurrencia}
 
+El modelo de concurrencia de Go surge del tedio y la dificultad de los programas concurrentes clásicos, al estilo de pthreads. Se quería cambiar esta visión de \emph{``Communicate by sharing memory''} por la contraria: \emph{``Share memory by communicating''}. Este cambio se produjo a través de:
+\begin{itemize}
+\item Goroutines en lugar de threads.
+\item Canales en lugar de variables globales.
+\end{itemize}
+
+Históricamente, para comunicarse entre hilos concurrentes, estos usaban variables globales a las que se le aplicaban mutex o blocks para sincronizarlas y que no hubiera problemas de acceso simultáneo. El modelo propuesto por Go, inspirado en los CSP de Hoare y los guarded commands de Dijkstra, no requiere experiencia previa en concurrencia y se basa en la comunicación a través de canales. %Faltan bocha de citas acá!
+
+Hoare, lo que proponía, era que los hilos se comunicaran entre sí a través de nombres. Es decir, cuando uno necesitara la información de otro, lo haría llamándolo directamente. En Go, los canales son uniones entre momentos de cada canal, para sincronizar el pasaje de información.
+
+\subsection{Goroutines}
+Una goroutine es una función que se ejecuta de manera concurrente con otras, es decir, que no se espera a que la goroutine termine para comenzar los otros procesos. Comparten el mismo espacio de direcciones, con lo cual tienen acceso a las mismas variables globales.
+
+Son \emph{light-weight} (livianas), ya que ocupan apenas un poco más que lo que reservan del stack, que es solo lo esencial. De requerir más memoria, como en el caso de las llamadas recursivas, se agrandan o achican pidiendo y liberando memoria del heap:
+
+\begin{enumerate}
+\item El linker inserta un pequeño preámbulo antes de cada llamada a función que verifica si hay o no espacio en el stack para su ejecución.
+\item Si no lo hay se pide espacio en el heap suficiente, se pasan los argumentos al nuevo espacio y se ejecuta.
+\item Luego se devuelven los argumentos y se libera lo pedido ni bien termina de ejecutarse.
+\end{enumerate}
+Para comparar, los pthreads de Unix tienen un default de 2MB y varían entre 1 y 8, mientras que las goroutines pueden ocupar algunos kilobytes.
+
+Para hacer concurrente el llamado a una función, simplemente se le antepone el prefijo \lstinline|go|.
+
+\lstinputlisting[caption = uso de goroutines, firstline = 5, label = interrupcion]{codigo/goroutines1.go}
+
+En el fragmento anterior, se ejecuta concurrente la función imprimir 5 veces, de forma que lo que debería verse es un conjunto, con un 1, dos 2, etc, en un orden no determinístico. Sin embargo, al ejecutarlo, no se ve ningún output y el programa termina su ejecución. Este es un problema común, que viene de lo descripto anteriormente: al ejecutar una función concurrentemente, el programa no espera a que termine su ejecución para seguir con los siguientes pasos, ni siquiera para terminar la ejecución. Esto último significa que por más que haya goroutines en ejecución, si el programa llega a su fin, estas terminarán bruscamente. Para saber si una rutina terminó su ejecución, necesitamos comunicación, lo cual se hará a través de channels.
+
+\subsection{Channels}
+Para facilitar la comunicación entre goroutines se utilizan canales tipados, que tienen un operador para enviarle (send) información y uno para recibirla de él (recieve).
+
+\begin{description}
+\item[Declaración:] \hfill \\
+	\lstinline|ch := make(chan int)|
+\item[Send:] \hfill \\
+	\lstinline|ch <- 5 // se envía el valor 5 al channel ch.|
+\item[Recieve:] \hfill \\
+	\lstinline|variable <- ch // se recive el dato que había en el channel.|
+\item[Recieve descartado:] \hfill \\
+	\lstinline|<- ch // el dato es devuelto (como una función) o descartado.|
+\end{description}
+
+Los channels son una forma sincrónica de comunicación, ya que cada al enviar o recibir un dato, la goroutine se bloquea hasta que alguna otra reciba o envíe el dato solicitado. Como se sabe en qué momento de la función se interactúa con el channel, se sabe en qué momento se comunicará con otra, concurrente a la anterior. Por eso se dice que las funciones se encuentran en un \emph{estado conocido} al transmitir información. Este es el modelo de comunicación para la concurrencia: siempre tiene que haber un emisor y un receptor.
+
+Es importante notar que los channels no son un medio de almacenar información, solo son medios de transmitirla. Si además se necesita almacenarla, existen los \emph{buffered channels}, que se verán más adelante.
+
+Para mostrar el comportamiento de bloqueo, los siguientes ejemplos pueden ser ilustrativos:
+
+\begin{lstlisting}[caption = deadlock]
+func main() {
+	ch = make(chan int)
+	ch <- 1
+	fmt.Println(<- ch)
+}
+\end{lstlisting}
+El programa anterior produce un deadlock, es decir, un bloqueo del programa a causa de que todas las goroutines estén bloqueadas. En la línea 3, al enviar el 1 al channel ch, la única goroutine (main) se bloquea, esperando que otra reciba ese dato. Como está bloqueada, la línea 4, donde se recibe el dato, nunca se ejecuta. El código bien implementado es el siguiente:
+\begin{lstlisting}[caption = envío y recepción básicos.]
+func main() {
+	ch = make(chan int)
+	go func(){ch <- 1}() // llamado a función anónima
+	fmt.Println(<- ch)
+}
+\end{lstlisting}
+Output: \verb|1| \\
+Lo único que cambió respecto de la implementación anterior es que la línea 3 ahora se ejecuta en una goroutine, concurrente a main. Entonces, en esa línea se envía el valor 1 y esa rutina se bloquea. Sin embargo, main sigue ejecutándose y en la línea 4 se recibe el dato del canal, que es impreso. Como el canal fue liberado en la línea 4, podría volverse a usar más adelante.
+
+\subsection{Buffered Channels}
+Los canales con buffer, además de ser un canal de comunicación, pueden almacenar hasta una cantidad máxima (fija) de variables recibidas.
+
+\begin{description}
+\item[Declaración:] \hfill \\
+	\lstinline|ch := make(chan int, 5) // 5 lugares|
+\item[Send:] \hfill \\
+	\lstinline|ch <- dato // hasta 5 veces, para el caso de arriba.|
+\item[Recieve:] \hfill \\
+	\lstinline|dato <- ch // devuelve lo almacenado en orden FIFO.|
+\end{description}
+
+Mientras haya lugares disponibles en el buffer, un send solo bloquea al channel y a la goroutine mientras se envía el dato. Si no hay más lugares disponibles, el send funciona igual que el de un channel sin buffer: se debe recibir un dato en alguna rutina para poder enviar uno nuevo.
+
+El recieve, por su parte, solo es causa de bloqueo cuando no hay ningún lugar en el buffer ocupado. En ese caso, hasta que no haya un send, se bloquea la goroutine.
+
+Más adelante, en la sección de patrones se ve un uso de este tipo de buffers.
+
+\subsection{Herramientas con Channels}
+\paragraph{for - range:} aplicado a channels recibe valores hasta que se cierre el channel con \lstinline|close|.
+
+\paragraph{select:} es un switch concurrente. Cuando uno de los casos es ejecutable, se elije esa opción. Si más de uno es ejecutable, se elije al azar. En general, cada uno de los casos es una operación sobre un channel, que se destraba cuando ocurre algún evento exterior. Si ninguna de las opciones es ejecutable, se espera a que alguna lo sea, salvo que haya un \lstinline|default|, que se ejecuta automáticamente en este caso. Es útil para evitar locks.
+
+\section{Patrones de Concurrencia}
+\subsection{Espera de un Evento}
+Muchas veces, la necesidad de comunicación entre goroutines, no es para transmitir un dato, sino para avisar que un proceso terminó. El caso más sencillo es esperar a que se termine un proceso para terminar, como es el caso del Fragmento \ref{interrupcion}.
+
+\lstinputlisting[caption = espera., firstline = 5]{codigo/esperaEvento.go}
+Output (menos los saltos de línea):
+\begin{verbatim}
+5 4 4 4 4 3 3 3 2 2 1 5 5 5 5 
+\end{verbatim}
+
+Ahora, a diferencia del primer intento, donde no se veía output, hay 5 descartes de valor en el channel c. Estos descartes bloquean a main hasta que reciban un valor, con lo cual solo termina el programa cuando se envía el quinto valor al channel c. En este programa, solo se envía un valor a c cuando termina la función imprimir.
+
+Resumiendo: el patrón consiste en mandar un valor cualquiera a un channel como aviso de que se termina un evento. El lugar que debe esperar al fin del evento, descarta el valor, lo cual solo puede hacerse una vez que haya terminado.
+
+\subsection{Generador}
+Un generador es una función que devuelve un channel, generalmente, con alguna función aplicada al mismo en forma concurrente. El siguiente ejemplo está basado en uno de Rob Pike sobre patrones de concurrencia \cite{video}.
+
+\lstinputlisting[caption = generador]{codigo/generator.go}
+
+En este caso, la función ``generar'' crea un channel de strings, y luego crea una goroutine que le manda constantemente mensajes a c, con intervalos aleatorios. Finalmente, devuelve c.
+
+La función principal, por otra parte, luego de utilizar al generador, recibe 10 veces una string del canal y las imprime, lo cual sucede ni bien son enviadas, lo cual puede observarse en la ejecución del programa.
+
+El patrón generador da resultados muy similares a los agentes de Oz en base a Ports.
+
+\subsection{Multiplexing}
+Este patrón toma varios canales con sus rutinas adosadas y las multiplexa sobre un solo canal, el cual devuelve. Esto modela varios servicios, cuyos mensajes son sincronizados en un canal y manejados en orden de llegada. La función principal que implementa este patrón en el siguiente fragmento es ``fanIn''.
+\lstinputlisting{codigo/multiplexing.go}
+
+La función ``boring'' ocupa el rol de generador. Devuelve un channel al que constantemente se le manda un mensaje, pasado por parámetro al momento de ser generado.
+
+En la función principal se ve como se multiplexan dos canales, uno a nombre de Joe y otro a nombre de Ann, en un canal llamado c, utilizando fanIn.
+
+El multiplexor, fanIn, crea un nuevo canal al que se le aplica una goroutine, o sea que es en sí mismo un caso particular de generador. Se diferencia principalmente de los otros generadores en que recibe dos canales y la función que le aplica al canal nuevo es un \lstinline|select| que recibe inputs de ambos. Como el \lstinline|select| elige el primer caso disponible, el canal le llegará un mensaje ni bien le llegue a un canal a cualquiera de los multiplexados.
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
 Acá explicamos las características de cada conjunto.
@@ -484,6 +608,7 @@ Otra característica importante es \textit{stop-the-world} el cual pausa, al mom
 \bibitem{method_int} FAQ de Go sobre \href{http://golang.org/doc/faq#methods_on_values_or_pointers}{punteros contra valores en los métodos}.
 \bibitem{methods_ef} Effective Go sobre \href{https://golang.org/doc/effective_go.html#methods}{métodos}.
 \bibitem{implements} FAQ de Go sobre \href{https://golang.org/doc/faq#implements_interface}{por qué no hay ``implements'' en Go}.
+\bibitem{video} Video de charla de Google Developers, por Rob Pike, sobre \href{https://www.youtube.com/watch?v=f6kdp27TYZs}{patrones de diseño para concurrencia en Go}.
 \end{thebibliography}
 
 \end{document}
