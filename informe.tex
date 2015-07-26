@@ -6,6 +6,7 @@
 % Para el español
 \usepackage[spanish]{babel}
 \usepackage[utf8]{inputenc}
+\spanishplainpercent
 % Codigo
 \usepackage{listings}
 % Para el código en Go.
@@ -386,7 +387,7 @@ La función countFrom es una generadora de funciones de enteros en enteros. Cada
 
 
 \subsection{Tipos de Datos en Go según los criterios de Ole Dahl}
-El teórico Noruego, en su trabajo Structured programming\cite{ole}, junto con Dijkstra y Hoare, estableció una serie de tipos de datos que debían ser representables en un lenguaje de programación. Según los que vimos en clase, los siguientes tienen su correspondiente representación en Go:
+El teórico noruego, en su trabajo Structured programming\cite{ole}, junto con Dijkstra y Hoare, estableció una serie de tipos de datos que debían ser representables en un lenguaje de programación. Según los que vimos en clase, los siguientes tienen su correspondiente representación en Go:
 \begin{description}
 \item[Producto Cartesiano:] El producto cartesiano entre conjuntos produce un conjunto de tuplas con un elemento de cada conjunto. En Go, esta función la cumplen los \emph{structs}.
 \item[Unión Disjunta:] esta es la unión entre conjuntos disjuntos. En C es ``union'', aquí hay un equivalente, que son las \emph{interfaces}, vistas más adelante, que agrupan tipos según los métodos.
@@ -566,6 +567,40 @@ Ahora, a diferencia del primer intento, donde no se veía output, hay 5 descarte
 
 Resumiendo: el patrón consiste en mandar un valor cualquiera a un channel como aviso de que se termina un evento. El lugar que debe esperar al fin del evento, descarta el valor, lo cual solo puede hacerse una vez que haya terminado.
 
+\subsection{Paralelización}
+Uno de los usos más comunes de los canales con buffer es el de administrar recursos limitados, por ejemplo, procesadores de un servidor. Si bien el paralelismo no está estudiado en este informe (Go es un lenguaje concurrente, no tiene grandes innovaciones en paralelismo) el diseño a través de la concurrencia puede preparar un programa para la ejecución paralela.
+
+En este caso, se procesan todos los elementos de un array en una cantidad de goroutines igual a la cantidad de núcleos que haya en la computadora, que también será el tamaño del buffer de un canal, que avisará cuando cada núcleo haya terminado su trabajo.
+
+\lstinputlisting{codigo/paralelo.go}
+
+Se puede ver que este patrón es muy similar a la espera de un evento, solo que el channel con buffer asegura que las NCPU tareas se puedan hacer en simultáneo, ya que el canal no se bloqueará si alguna le envía un mensaje antes de llegar a recibirlo el ambiente. Este código no es paralelo, pero con solo aclarar en el código cuántos núcleos se deben usar, el patrón se encarga de distribuir las tareas acorde a los núcleos.
+
+El output de la ejecución es el siguiente: 
+\begin{verbatim}
+v[15] == 59 (tarea 4) 
+v[0] == 81 (tarea 1) 
+v[16] == 81 (tarea 4) 
+v[1] == 318 (tarea 1) 
+v[17] == 425 (tarea 4) 
+v[10] == 847 (tarea 3) 
+v[5] == 887 (tarea 2) 
+v[2] == 540 (tarea 1) 
+v[18] == 456 (tarea 4) 
+v[11] == 300 (tarea 3) 
+v[19] == 162 (tarea 4) 
+v[12] == 89 (tarea 3) 
+v[3] == 511 (tarea 1) 
+v[6] == 694 (tarea 2) 
+v[4] == 274 (tarea 1) 
+v[7] == 211 (tarea 2) 
+v[13] == 728 (tarea 3) 
+v[14] == 237 (tarea 3) 
+v[8] == 445 (tarea 2) 
+v[9] == 106 (tarea 2) 
+\end{verbatim}
+
+Una observación es que una vez que una tarea termina, ese núcleo deja de ser útil (por ejemplo, una vez que la tarea 4 termina, ese núcleo deja de usarse). Para un patrón de balanceo más completo, se puede ver en la charla de Rob Pike sobre paralelismo contra concurrencia\cite{parvscon}.
 \subsection{Generador}
 Un generador es una función que devuelve un channel, generalmente, con alguna función aplicada al mismo en forma concurrente. El siguiente ejemplo está basado en uno de Rob Pike sobre patrones de concurrencia \cite{video}.
 
@@ -583,9 +618,35 @@ Este patrón toma varios canales con sus rutinas adosadas y las multiplexa sobre
 
 La función ``boring'' ocupa el rol de generador. Devuelve un channel al que constantemente se le manda un mensaje, pasado por parámetro al momento de ser generado.
 
-En la función principal se ve como se multiplexan dos canales, uno a nombre de Joe y otro a nombre de Ann, en un canal llamado c, utilizando fanIn.
+En la función principal se ve como se multiplexan dos canales, uno a nombre de Joe y otro a nombre de Ann, en un canal llamado c, utilizando fanIn. Luego de recibir 20 mensajes, se aburre y termina el programa.
 
 El multiplexor, fanIn, crea un nuevo canal al que se le aplica una goroutine, o sea que es en sí mismo un caso particular de generador. Se diferencia principalmente de los otros generadores en que recibe dos canales y la función que le aplica al canal nuevo es un \lstinline|select| que recibe inputs de ambos. Como el \lstinline|select| elige el primer caso disponible, el canal le llegará un mensaje ni bien le llegue a un canal a cualquiera de los multiplexados.
+
+Un caso de ejecución de este programa mostró el siguiente output:
+\begin{verbatim}
+0: Ann 
+0: Joe 
+1: Ann 
+1: Joe 
+2: Ann 
+2: Joe 
+3: Ann 
+3: Joe 
+4: Ann 
+4: Joe 
+5: Ann 
+5: Joe 
+6: Ann 
+6: Joe 
+7: Joe 
+7: Ann 
+8: Ann 
+9: Ann 
+8: Joe 
+9: Joe 
+You're both boring; I'm leaving.
+\end{verbatim}
+
 \section{Recolector de Basura}
 El Recolector de Basura de Go usa una variante de \textit{marcado-y-barrido} donde en vez de usar solamente 2 colores para el marcado, usa 3. 
 Acá explicamos las características de cada conjunto.
@@ -596,7 +657,7 @@ Acá explicamos las características de cada conjunto.
 \end{itemize}
 
 Otra característica importante es \textit{stop-the-world} el cual pausa, al momento de correr el recolector, todos los hilos menos aquellos que utilice el recolector hasta que finalice el mismo. 
-
+\newpage
 \begin{thebibliography}{99}
 \bibitem{dec} Nota en The Go Blog sobre la \href{http://blog.golang.org/gos-declaration-syntax}{sintáxis de la declaración}.
 \bibitem{pa} FAQ sobre \href{https://golang.org/doc/faq#no_pointer_arithmetic}{aritmética de punteros}.
@@ -609,6 +670,7 @@ Otra característica importante es \textit{stop-the-world} el cual pausa, al mom
 \bibitem{methods_ef} Effective Go sobre \href{https://golang.org/doc/effective_go.html#methods}{métodos}.
 \bibitem{implements} FAQ de Go sobre \href{https://golang.org/doc/faq#implements_interface}{por qué no hay ``implements'' en Go}.
 \bibitem{video} Video de charla de Google Developers, por Rob Pike, sobre \href{https://www.youtube.com/watch?v=f6kdp27TYZs}{patrones de diseño para concurrencia en Go}.
+\bibitem{parvscon} Slides de la charla de Rob Pike \href{http://talks.golang.org/2012/waza.slide#45}{Paralelismo vs Concurrencia} en Go.
 \end{thebibliography}
 
 \end{document}
