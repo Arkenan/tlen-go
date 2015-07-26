@@ -600,7 +600,8 @@ v[8] == 445 (tarea 2)
 v[9] == 106 (tarea 2) 
 \end{verbatim}
 
-Una observación es que una vez que una tarea termina, ese núcleo deja de ser útil (por ejemplo, una vez que la tarea 4 termina, ese núcleo deja de usarse). Para un patrón de balanceo más completo, se puede ver en la charla de Rob Pike sobre paralelismo contra concurrencia\cite{parvscon}.
+Una imperfección de esta implementación puede observarse en que una vez que una tarea termina, ese núcleo deja de trabajar. En el caso particular de esta ejecución, una vez que la tarea 4 termina, ese núcleo deja de usarse. Para un patrón de balanceo de tareas más completo, se puede ver en la charla de Rob Pike sobre paralelismo contra concurrencia\cite{parvscon}.
+
 \subsection{Generador}
 Un generador es una función que devuelve un channel, generalmente, con alguna función aplicada al mismo en forma concurrente. El siguiente ejemplo está basado en uno de Rob Pike sobre patrones de concurrencia \cite{video}.
 
