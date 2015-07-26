@@ -8,8 +8,8 @@ func (s *sliceEnteros) agregar(elemento int) {
 	l := len(*s)
 	c := cap(*s)
 	var sret sliceEnteros
-	
-	if l + 1 > c {
+
+	if l+1 > c {
 		sret = sliceEnteros(make([]int, l, 2*c))
 		for i, v := range *s {
 			sret[i] = v

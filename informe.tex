@@ -603,7 +603,7 @@ v[9] == 106 (tarea 2)
 Una imperfección de esta implementación puede observarse en que una vez que una tarea termina, ese núcleo deja de trabajar. En el caso particular de esta ejecución, una vez que la tarea 4 termina, ese núcleo deja de usarse. Para un patrón de balanceo de tareas más completo, se puede ver en la charla de Rob Pike sobre paralelismo contra concurrencia\cite{parvscon}.
 
 \subsection{Generador}
-Un generador es una función que devuelve un channel, generalmente, con alguna función aplicada al mismo en forma concurrente. El siguiente ejemplo está basado en uno de Rob Pike sobre patrones de concurrencia \cite{video}.
+Un generador es una función que devuelve un channel, generalmente, con alguna función aplicada al mismo en forma concurrente. Una de las utilidades del generador es hacer un mock de un servicio, ya que recibe inputs permanentemente y esconde el proceso detrás para los que lo usen. El siguiente ejemplo está basado en uno de Rob Pike sobre patrones de concurrencia \cite{video}.
 
 \lstinputlisting[caption = generador]{codigo/generator.go}
 
@@ -646,6 +646,26 @@ Un caso de ejecución de este programa mostró el siguiente output:
 8: Joe 
 9: Joe 
 You're both boring; I'm leaving.
+\end{verbatim}
+
+\subsection{Timeout}
+El timeout (implementado en el main) es un patrón que sirve para esperar un determinado tiempo a que se complete una operación. De no completarse, se avisa y se cancela.
+\lstinputlisting{codigo/timeout.go}
+
+Para su implementación, el timeout utiliza un \lstinline|select|. En uno de los casos está la acción que tarda en realizarse. En el otro caso, una acción de tiempo constante, que es el tiempo admitido hasta cancelar la otra acción. 
+
+En el fragmento de código anterior, el canal c recibe constantemente, en intervalos aleatorios, mensajes que dicen "Joe". Si un mensaje tarda más de 899 milisegundos, entrará el segundo caso del select, que le advierte a Joe que fue muy lento y terminará el programa.
+
+En el siguiente caso de ejecución, el mensaje número 26 tarda más de lo aceptado por el timeout y no llega a mostrarse:
+\begin{verbatim}
+0: Hi! I'm Joe!
+1: Hi! I'm Joe!
+2: Hi! I'm Joe!
+3: Hi! I'm Joe!
+[...]
+24: Hi! I'm Joe!
+25: Hi! I'm Joe!
+You're too slow.
 \end{verbatim}
 
 \section{Recolector de Basura}
