@@ -49,16 +49,30 @@
 \end{figure}
 
 \title{Informe sobre GO - Teoría del Lenguaje}
-\author{Cristian Gonzalez \and Tomás Arjovsky}
+\author{Cristian González \and Tomás Arjovsky}
 \date{1$^{er}$ Cuatrimestre, 2015}
 \maketitle
 \newpage
 \tableofcontents
 \newpage
 \section{Historia}
+\subsection{Historia del Proyecto}
+El 21 de septiembre de 2007 Robert Griesemer, Rob Pike y Ken Thompson comenzaron a esbozar metas sobre el nuevo lenguaje. A los pocos días los objetivos se habían asentado en proyecto concreto y en idea clara de lo que sería. En enero de 2008 Jen había empezado a trabajar en un compilador para explorar ideas y el cual generaba código en C.
+En mayo de 2008, Ian Taylor comenzó de forma independiente en CCG para Go utilizando el borrador de la especificación. Russ Cox se unió a finales de 2008 y ayudó a mover el lenguaje y las bibliotecas del prototipo a realidad.
+Go se publica como un proyecto de código abierto el 10 de Noviembre del 2009. 
+
+\subsection{Estado del Proyecto}
+
+Go se convirtió en un proyecto público de código abierto, el 10 de noviembre de 2009. Después de un par de años de diseño y desarrollo, estabilidad Go 1 fue lanzado el 28 de marzo de 2012. Go 1, que incluye una especificación del lenguaje, conjunto de bibliotecas y herramientas personalizadas, proporciona una base estable para la creación de productos fiables, proyectos y publicaciones. 
+
+Con esa estabilidad establecida, Google utiliza Go para desarrollar programas, productos y herramientas en lugar de cambiar activamente el lenguaje y las bibliotecas. De hecho, el objetivo de Go 1 es proporcionar estabilidad a largo plazo. El desarrollo de Go sigue en pie, pero la atención se centra en el rendimiento, fiabilidad, portabilidad y la adición de nuevas funcionalidades como soporte mejorado para la internacionalización.
 % y un poco de lo general.
 % Compilador, formateador de codigo y demas.
 % Errores por no usar variables en lugar de warnings.
+\subsection{¿Por qué la creación de Go?}
+
+Go nació de la frustración con lenguajes y entornos existentes para la programación de sistemas. La programación había vuelto demasiado difícil y la elección de las lenguas era parte de la culpa. Había que elegir entre la compilación eficiente, eficaz ejecución, o la facilidad de programación; los tres no estaban disponibles en un mismo lenguaje. Los programadores que podría elegían facilidad sobre la seguridad y la eficiencia moviendo a escribirse dinámicamente lenguajes como Python y JavaScript en lugar de C ++ o, en menor medida, de Java. Go es un intento de combinar la facilidad de programación de un lenguaje interpretado, tipos dinámicos con eficiencia y la seguridad de un lenguaje compilado estáticamente. Por último, se pretende que ser rápido: debe tener como máximo unos segundos para construir un gran ejecutable en un solo equipo. Para cumplir con estos objetivos se requieren abordar una serie de cuestiones lingüísticas: un sistema de tipo expresivo, pero ligero; concurrencia y un buen recolector de basura; especificación de la dependencia rígida; etcétera.
+
 \section{Sintaxis Básica}
 \subsection{Paquetes}
 Cada archivo de código fuente, independientemente de su nombre, aclara en la primera línea a qué paquete pertenece.
