@@ -49,7 +49,7 @@
 \end{figure}
 
 \title{Informe sobre GO - Teoría del Lenguaje}
-\author{Cristian González \and Tomás Arjovsky}
+\author{Cristian González \and Tomás Arjovsky \and Juan Gómez}
 \date{1$^{er}$ Cuatrimestre, 2015}
 \maketitle
 \newpage
@@ -57,22 +57,22 @@
 \newpage
 \section{Historia}
 \subsection{Historia del Proyecto}
-El 21 de septiembre de 2007 Robert Griesemer, Rob Pike y Ken Thompson comenzaron a esbozar metas sobre el nuevo lenguaje. A los pocos días los objetivos se habían asentado en proyecto concreto y en idea clara de lo que sería. En enero de 2008 Jen había empezado a trabajar en un compilador para explorar ideas y el cual generaba código en C.
+El 21 de septiembre de 2007, Robert Griesemer, Rob Pike y Ken Thompson comenzaron a esbozar metas sobre el nuevo lenguaje. A los pocos días los objetivos se habían asentado en proyecto concreto y en idea clara de lo que sería. En enero de 2008 Ken había empezado a trabajar en un compilador para explorar ideas y el cual generaba código en C.
 En mayo de 2008, Ian Taylor comenzó de forma independiente en CCG para Go utilizando el borrador de la especificación. Russ Cox se unió a finales de 2008 y ayudó a mover el lenguaje y las bibliotecas del prototipo a realidad.
 Go se publica como un proyecto de código abierto el 10 de Noviembre del 2009. 
 
 \subsection{Estado del Proyecto}
 
-Go se convirtió en un proyecto público de código abierto, el 10 de noviembre de 2009. Después de un par de años de diseño y desarrollo, estabilidad Go 1 fue lanzado el 28 de marzo de 2012. Go 1, que incluye una especificación del lenguaje, conjunto de bibliotecas y herramientas personalizadas, proporciona una base estable para la creación de productos fiables, proyectos y publicaciones. 
+Go se convirtió en un proyecto público de código abierto el 10 de noviembre de 2009. Después de un par de años de diseño y desarrollo, se alcanzó la estabilidad y Go 1 fue lanzado el 28 de marzo de 2012. Go 1, que incluye una especificación del lenguaje, conjunto de bibliotecas y herramientas personalizadas, proporciona una base estable para la creación de productos fiables, proyectos y publicaciones. 
 
 Con esa estabilidad establecida, Google utiliza Go para desarrollar programas, productos y herramientas en lugar de cambiar activamente el lenguaje y las bibliotecas. De hecho, el objetivo de Go 1 es proporcionar estabilidad a largo plazo. El desarrollo de Go sigue en pie, pero la atención se centra en el rendimiento, fiabilidad, portabilidad y la adición de nuevas funcionalidades como soporte mejorado para la internacionalización.
 \subsection{¿Por qué la creación de Go?}
 
-Go nació de la frustración con lenguajes y entornos existentes para la programación de sistemas. La programación había vuelto demasiado difícil y la elección de las lenguas era parte de la culpa. Había que elegir entre la compilación eficiente, eficaz ejecución, o la facilidad de programación; los tres no estaban disponibles en un mismo lenguaje. Los programadores que podría elegían facilidad sobre la seguridad y la eficiencia moviendo a escribirse dinámicamente lenguajes como Python y JavaScript en lugar de C ++ o, en menor medida, de Java. 
+Go nació de la frustración con lenguajes y entornos existentes para la programación de sistemas. La programación se había vuelto demasiado difícil y la elección de los lenguajes era parte de la culpa. Había que elegir entre la compilación eficiente, eficaz ejecución, o la facilidad de programación; los tres no estaban disponibles en un mismo lenguaje. Los programadores que podían, elegían facilidad sobre la seguridad y la eficiencia, moviéndolos a escribir en lenguajes lenguajes dinámicos como Python y JavaScript en lugar de C ++ o, en menor medida, de Java. 
 
 Go es un intento de combinar la \textbf{facilidad de programación de un lenguaje interpretado}, \textbf{tipos dinámicos con eficiencia} y \textbf{la seguridad de un lenguaje compilado estáticamente}. 
 
-Por último, se pretende que ser rápido: debe tener como máximo unos segundos para construir un gran ejecutable en un solo equipo. Para cumplir con estos objetivos se requieren abordar una serie de cuestiones lingüísticas: un sistema de tipo expresivo, pero ligero; concurrencia y un buen recolector de basura; especificación de la dependencia rígida; etcétera.
+Por último, se pretende que sea rápido: debe llevar como máximo unos segundos para construir un gran ejecutable en un solo equipo. Para cumplir con estos objetivos se requieren abordar una serie de cuestiones lingüísticas: un sistema de tipo expresivo, pero ligero; concurrencia y un buen recolector de basura; especificación de la dependencia rígida; etcétera.
 
 \section{Sintaxis Básica}
 \subsection{Paquetes}
@@ -684,7 +684,7 @@ You're too slow.
 \end{verbatim}
 
 \section{Recolector de Basura}
-El Recolector de Basura de Go es eficiente, siendo coherente con los objetivos por los cuales se creo Go, acá presenteramos y analizaremos características de la versión 1.4. 
+El Recolector de Basura de Go es eficiente, siendo coherente con los objetivos por los cuales se creó Go. En adelante presentaremos y analizaremos las características de la versión 1.4. 
 
 Acá mencionamos las características principales del recolector:
 
@@ -697,20 +697,20 @@ Acá mencionamos las características principales del recolector:
 \end{itemize}
 \subsection{Marcado y Barrido}
 
-El recoletor de basura de Go es muy eficiente, siendo coherentes con los objetivos de las creación de Go, esto en parte de debe al uso algoritmo de Marcado y Barrido, este algoritmo bastante popular está basado en Dijkstra, este algoritmo en su versión más común usa 2 colores, pero Go uso una variante de 3 colores. Los colores son: gris, negro y blanco, donde cada color representa un conjunto donde cada los conjuntos son disjunto, osea cada nodo (porción de memoria) es de un sólo color. En un principio toda la memoria es "pintada de blanco", y termina cuando se haya recorrido todo la memoria. 
+La eficiencia del algoritmo, en parte, se debe al uso del algoritmo de Marcado y Barrido, bastante popular, basado en Dijkstra. En su versión más común usa 2 colores, pero Go uso una variante de 3. Los colores son: gris, negro y blanco, donde cada color representa un conjunto disjunto, es decir, cada nodo (porción de memoria) es de un sólo color. En un principio toda la memoria es "pintada de blanco", y termina cuando se haya recorrido todo la memoria. 
 Acá se explica las características de cada conjunto.
 \begin{itemize}
-	\item[$\bullet$] Gris: Un nodo gris es aquel que ya fue "marcado" pero aun no se visitaron sus hijos (referencias). El conjunto gris no es candidatos a borrarse. Un nodo que no tiene refencias, una vez marcado gris, automaticamente pasa a ser del conjunto negro. 
-	\item Negro: Es el conjunto de los nodos del cuales ya marcó tanto al nodo como a sus referencias.
-	\item Blanco: son aquellos que son candidatos a reciclar. En un principio todos son candidatos a reciclar, luego de hacer el barrido, se procede a borrar el conjunto blanco, ya que si un nodo es blanco es debido a que no existe ninguna referencia que apunte al mismo. 
+	\item[$\bullet$] Gris: Un nodo gris es aquel que ya fue "marcado" pero aun no se visitaron sus hijos (referencias). El conjunto gris no es candidato a borrarse. Un nodo que no tiene referencias, una vez marcado gris, automáticamente pasa a ser del conjunto negro. 
+	\item Negro: Es el conjunto de los nodos de los cuales ya se marcó tanto al nodo como a sus referencias.
+	\item Blanco: son aquellos que son candidatos a ser reciclados. En un principio todos son candidatos a reciclar, luego de hacer el barrido, se procede a borrar el conjunto blanco, ya que si un nodo es blanco es debido a que no existe ninguna referencia que apunte al mismo. 
 \end{itemize}
 
 \subsubsection{Funcionamiento del Algoritmo}
 
 El primer paso consiste en "pintar" a toda la memoria de blanco, es decir, cada nodo del grafo pertenece al conjunto blanco. Luego se accede a la raíz y se la inserta en el conjunto gris. 
-Se accede a un nodo del conjunto gris y se procede a visitar a todas las referencias, una vez que se marcaron todas las referencias, el nodo pasa al conjunto negro. Todos las referencias del nodo que vistaron pasan al conjunto gris. Luego se accede a otro nodo cualquiera del conjunto gris y se procede así de forma recurrente, hasta que el conjunto gris quede vacío, es acá cuando el algoritmo termina.
+Se accede a un nodo del conjunto gris y se procede a visitar a todas las referencias. Una vez que se marcaron todas las referencias, el nodo pasa al conjunto negro. Todas las referencias del nodo que visitaron pasan al conjunto gris. Luego se accede a otro nodo cualquiera del conjunto gris y se procede así de forma recurrente, hasta que el conjunto gris quede vacío, es acá cuando el algoritmo termina.
 
-Luego se procede al "barrido" de la memoria, que consiste en borrar todas los nodos que estan en el conjunto blanco, ya que a estos nodos nunca se pudieron acceder porque no hay referencias que no apunten a ellos.
+Luego se procede al "barrido" de la memoria, que consiste en borrar todas los nodos que están en el conjunto blanco, ya que a estos nodos nunca se pudieron acceder porque no hay referencias que no apunten a ellos.
 
 
 \subsection{Stop-the-Word}
@@ -722,7 +722,7 @@ Luego se procede al "barrido" de la memoria, que consiste en borrar todas los no
 \end{figure}
 
 
-Esta es una procedicimiento, en el cual para iniciar la ejecución del recolector de basura, se pausa todos los hilos excepto aquellos que son de utilidad o necesite el recolector. En este este lapso de tiempo, el programa no podrá procesar nada, pero para contrarrestar esta desventaja, STW funciona por un lapso de 10 milisegundos, luego el programa sigue funcionando. Esto es una característica importante, el programa no tiene que esperar hasta que el recolector de basura termine, esto es importante para sistemas de tiempo de ejecución real. Básicamente con esta característica, el recolector procede de a pequeños lapsos de tiempo hasta que termine. Pero para eso, debe ser acompañado de un algoritmo compatible, que así lo es el marcado-y-barrido.
+Este es un procedimiento en el cual, para iniciar la ejecución del recolector de basura, se pausan todos los hilos excepto aquellos que son de utilidad o necesiten el recolector. En este este lapso de tiempo el programa no podrá procesar nada, pero para contrarrestar esta desventaja, STW funciona por un lapso de 10 milisegundos, luego del cual, el programa sigue funcionando. Esta es una característica importante: el programa no tiene que esperar hasta que el recolector de basura termine. Esto es importante para sistemas de tiempo de ejecución real. Básicamente con esta característica, el recolector procede de a pequeños lapsos de tiempo hasta que termine. Pero para eso debe ser acompañado de un algoritmo compatible, que así lo es el marcado-y-barrido.
 
 \newpage
 \begin{thebibliography}{99}
